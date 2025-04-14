@@ -1,0 +1,84 @@
+{
+  "name": "@papaya_fi/sdk",
+  "version": "1.0.0",
+  "description": "SDK for interacting with the Papaya Protocol",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE",
+    "documentation/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build && npm run copy-docs",
+    "build-demo": "webpack --config demo/webpack.config.js",
+    "demo": "npm run build-demo && npx http-server demo -o",
+    "prepublishOnly": "npm run test",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "copy-docs": "node scripts/copy-docs.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/papaya-fi/sdk.git"
+  },
+  "keywords": [
+    "papaya",
+    "protocol",
+    "sdk",
+    "ethereum",
+    "blockchain",
+    "subscriptions",
+    "payments"
+  ],
+  "author": "Papaya Protocol",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/papaya-fi/sdk/issues"
+  },
+  "homepage": "https://github.com/papaya-fi/sdk#readme",
+  "dependencies": {
+    "@reown/appkit": "^1.7.0",
+    "ethers": "^6.0.0"
+  },
+  "peerDependencies": {
+    "ethers": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.0",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.35.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "http-server": "^14.1.1",
+    "husky": "^8.0.3",
+    "jest": "^29.5.0",
+    "jest-mock-extended": "^4.0.0-beta1",
+    "lint-staged": "^13.1.2",
+    "prettier": "^2.8.4",
+    "ts-jest": "^29.2.6",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}

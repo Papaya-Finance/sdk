@@ -1,0 +1,40 @@
+# Source files
+src/
+
+# Testing
+jest.config.js
+**/*.test.ts
+**/*.spec.ts
+coverage/
+
+# Development tools
+.eslintrc.js
+.eslintignore
+.prettierrc
+.husky/
+.github/
+create-directories.sh
+
+# Demo and examples (these should be in separate packages or repos)
+demo/
+
+# Documentation source (keep compiled docs)
+DOCS/
+
+# Misc
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo 
