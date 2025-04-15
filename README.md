@@ -95,7 +95,7 @@ Explore the full documentation for detailed information on all available methods
 
 ## Support
 
-For questions, issues or feature requests, please open an issue on our GitHub repository or contact us at support@papaya.finance.
+For questions, issues or feature requests, please open an issue on our GitHub repository or contact us at [Papaya Community](https://t.me/PapayaCommunity/26037).
 
 ## License
 
