@@ -121,16 +121,6 @@ async function connectWallet() {
         
         logOutput(`Connected to account: ${account}`);
         
-        // Display the actual token being used (may differ from selected if fallback occurred)
-        const actualToken = papayaSDK.getTokenSymbol();
-        if (actualToken !== token) {
-            logOutput(`Note: Token ${token} not supported on ${network}. Using ${actualToken} instead.`, true);
-            // Update the dropdown to show the actual token
-            tokenSelect.value = actualToken;
-        } else {
-            logOutput(`Using network: ${network}, token: ${token}`);
-        }
-        
         // Check if we're on the correct network
         const { chainId } = await provider.getNetwork();
         logOutput(`Connected to chain ID: ${chainId}`);

@@ -83,8 +83,8 @@ export class PapayaSDK {
       network = 'polygon';
     }
 
-     // Validate token for the selected network
-     if (!NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]]) {
+    // Validate token for the selected network
+    if (!NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]]) {
       console.error(`Token ${tokenSymbol} not supported on ${network}. Falling back to USDT.`);
       tokenSymbol = 'USDT';
       
@@ -105,6 +105,12 @@ export class PapayaSDK {
         }
       }
     }
+
+    // Set default version if not provided
+    if (!contractVersion) {
+      contractVersion = DEFAULT_VERSIONS[network];
+    }
+
     const tokenConfigs = NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]] as TokenConfig[];
     const versionConfig = tokenConfigs.find((config: TokenConfig) => config.version === contractVersion);
     
@@ -115,13 +121,12 @@ export class PapayaSDK {
       contractVersion = latestConfig.version;
     }
 
-    const version: string = contractVersion || DEFAULT_VERSIONS[network];
-    const contractAddress = PapayaSDK.getContractAddress(network, tokenSymbol, version);
+    const contractAddress = PapayaSDK.getContractAddress(network, tokenSymbol, contractVersion);
     // Create SDK instance - token validation is now handled in the constructor
     return new PapayaSDK({
       provider,
       contractAddress,
-      contractVersion: version
+      contractVersion
     });
   }
 
