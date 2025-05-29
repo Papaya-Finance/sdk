@@ -14,7 +14,7 @@ describe('PapayaSDK', () => {
     };
 
     // Create the SDK with a minimal implementation
-    sdk = PapayaSDK.create(mockProvider as any, 'polygon', 'USDT');
+    sdk = PapayaSDK.create(mockProvider as any, 'polygon', 'USDT', '1.5.1');
 
     // Create spies for all the methods we want to test
     spyObj = {
@@ -46,7 +46,6 @@ describe('PapayaSDK', () => {
         projectId: 1
       }),
       pay: jest.spyOn(sdk, 'pay').mockResolvedValue({ hash: '0xtxhash' }),
-      getTokenSymbol: jest.spyOn(sdk, 'getTokenSymbol').mockReturnValue('USDT'),
       getChainId: jest.spyOn(sdk as any, 'getChainId').mockResolvedValue(137)
     };
   });
@@ -223,15 +222,6 @@ describe('PapayaSDK', () => {
       
       expect(spyObj.pay).toHaveBeenCalledWith(recipient, 100);
       expect(txResponse).toEqual({ hash: '0xtxhash' });
-    });
-  });
-  
-  describe('Token Information', () => {
-    test('gets token symbol', () => {
-      const tokenSymbol = sdk.getTokenSymbol();
-      
-      expect(spyObj.getTokenSymbol).toHaveBeenCalled();
-      expect(tokenSymbol).toBe('USDT');
     });
   });
   
