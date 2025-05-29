@@ -14,7 +14,7 @@ describe('PapayaSDK', () => {
     };
 
     // Create the SDK with a minimal implementation
-    sdk = PapayaSDK.create(mockProvider as any, 'polygon', 'USDT');
+    sdk = PapayaSDK.create(mockProvider as any, 'polygon', 'USDT', '1.5.1');
 
     // Create spies for all the methods we want to test
     spyObj = {
