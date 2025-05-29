@@ -75,7 +75,7 @@ export class PapayaSDK {
     provider: ethers.Provider | ethers.Signer,
     network: NetworkName = 'polygon',
     tokenSymbol: TokenSymbol = 'USDT',
-    contractVersion: string
+    contractVersion?: string
   ): PapayaSDK {
     // Validate network
     if (!NETWORKS[network]) {
@@ -116,7 +116,7 @@ export class PapayaSDK {
     }
 
     const version: string = contractVersion || DEFAULT_VERSIONS[network];
-    const contractAddress = PapayaSDK.getContractAddress(network, tokenSymbol, contractVersion);
+    const contractAddress = PapayaSDK.getContractAddress(network, tokenSymbol, version);
     // Create SDK instance - token validation is now handled in the constructor
     return new PapayaSDK({
       provider,
