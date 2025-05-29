@@ -6,11 +6,8 @@ import { TokenSymbol, NetworkName } from '../contracts/networks';
  */
 export interface PapayaSDKOptions {
   provider: ethers.Provider | ethers.Signer;
-  network?: NetworkName;
-  tokenSymbol?: TokenSymbol;
-  contractVersion?: string;
-  contractAddress?: string;
-  tokenAddress?: string;
+  contractVersion: string;
+  contractAddress: string;
 }
 
 /**

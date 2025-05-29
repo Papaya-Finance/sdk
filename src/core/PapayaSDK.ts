@@ -20,10 +20,6 @@ export class PapayaSDK {
   private provider: ethers.Provider;
   private signer: ethers.Signer | null;
   private contract: ethers.Contract;
-  private tokenContract: ethers.Contract | null = null;
-  private tokenAddress: string;
-  private network: NetworkName;
-  private tokenSymbol: TokenSymbol;
   private contractVersion: string;
 
   /**
@@ -31,7 +27,7 @@ export class PapayaSDK {
    * 
    * @param options - Configuration options for the SDK
    */
-  private constructor(options: PapayaSDKOptions) {
+  public constructor(options: PapayaSDKOptions) {
     // Set provider and signer
     if ('getAddress' in options.provider && typeof options.provider.getAddress === 'function') {
       // It's a signer
@@ -43,51 +39,20 @@ export class PapayaSDK {
       this.signer = null;
     }
 
-    // Set network and token symbol
-    this.network = options.network || 'polygon';
-    this.tokenSymbol = options.tokenSymbol || 'USDT';
-    this.contractVersion = options.contractVersion || DEFAULT_VERSIONS[this.network];
-
-    // Validate token for the selected network
-    if (!NETWORKS[this.network][this.tokenSymbol as keyof typeof NETWORKS[typeof this.network]]) {
-      console.error(`Token ${this.tokenSymbol} not supported on ${this.network}. Falling back to USDT.`);
-      this.tokenSymbol = 'USDT';
-      
-      // If USDT is also not supported, try USDC
-      if (!NETWORKS[this.network][this.tokenSymbol as keyof typeof NETWORKS[typeof this.network]]) {
-        console.error(`USDT not supported on ${this.network}. Falling back to USDC.`);
-        this.tokenSymbol = 'USDC';
-        
-        // If neither USDT nor USDC is supported, use the first available token
-        if (!NETWORKS[this.network][this.tokenSymbol as keyof typeof NETWORKS[typeof this.network]]) {
-          const availableTokens = Object.keys(NETWORKS[this.network]) as TokenSymbol[];
-          if (availableTokens.length > 0) {
-            this.tokenSymbol = availableTokens[0];
-            console.error(`USDC not supported on ${this.network}. Falling back to ${this.tokenSymbol}.`);
-          } else {
-            throw new Error(`No tokens supported on ${this.network}`);
-          }
-        }
-      }
+    if (!options.contractVersion) {
+      throw new Error(`Contract version not supplied!`);
     }
+    // Set network and token symbol
+    this.contractVersion = options.contractVersion;
 
-    // Validate version
-    const tokenConfigs = NETWORKS[this.network][this.tokenSymbol as keyof typeof NETWORKS[typeof this.network]] as TokenConfig[];
-    const versionConfig = tokenConfigs.find((config: TokenConfig) => config.version === this.contractVersion);
-    
-    if (!versionConfig) {
-      console.error(`Version ${this.contractVersion} not supported for ${this.tokenSymbol} on ${this.network}. Using the latest available version.`);
-      // Use the latest version available
-      const latestConfig = tokenConfigs[tokenConfigs.length - 1];
-      this.contractVersion = latestConfig.version;
+    if (!options.contractAddress) {
+      throw new Error(`Contract addres not supplied!`);
     }
 
     // Set contract address and token address
-    const contractAddress = options.contractAddress || 
-      this.getContractAddress(this.network, this.tokenSymbol, this.contractVersion);
+    const contractAddress = options.contractAddress;
     
-    this.tokenAddress = options.tokenAddress || 
-      this.getTokenAddress(this.network, this.tokenSymbol, this.contractVersion);
+   
 
     // Initialize contract
     this.contract = new ethers.Contract(
@@ -110,7 +75,7 @@ export class PapayaSDK {
     provider: ethers.Provider | ethers.Signer,
     network: NetworkName = 'polygon',
     tokenSymbol: TokenSymbol = 'USDT',
-    contractVersion?: string
+    contractVersion: string
   ): PapayaSDK {
     // Validate network
     if (!NETWORKS[network]) {
@@ -118,12 +83,45 @@ export class PapayaSDK {
       network = 'polygon';
     }
 
+     // Validate token for the selected network
+     if (!NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]]) {
+      console.error(`Token ${tokenSymbol} not supported on ${network}. Falling back to USDT.`);
+      tokenSymbol = 'USDT';
+      
+      // If USDT is also not supported, try USDC
+      if (!NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]]) {
+        console.error(`USDT not supported on ${network}. Falling back to USDC.`);
+        tokenSymbol = 'USDC';
+        
+        // If neither USDT nor USDC is supported, use the first available token
+        if (!NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]]) {
+          const availableTokens = Object.keys(NETWORKS[network]) as TokenSymbol[];
+          if (availableTokens.length > 0) {
+            tokenSymbol = availableTokens[0];
+            console.error(`USDC not supported on ${network}. Falling back to ${tokenSymbol}.`);
+          } else {
+            throw new Error(`No tokens supported on ${network}`);
+          }
+        }
+      }
+    }
+    const tokenConfigs = NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]] as TokenConfig[];
+    const versionConfig = tokenConfigs.find((config: TokenConfig) => config.version === contractVersion);
+    
+    if (!versionConfig) {
+      console.error(`Version ${contractVersion} not supported for ${tokenSymbol} on ${network}. Using the latest available version.`);
+      // Use the latest version available
+      const latestConfig = tokenConfigs[tokenConfigs.length - 1];
+      contractVersion = latestConfig.version;
+    }
+
+    const version: string = contractVersion || DEFAULT_VERSIONS[network];
+    const contractAddress = PapayaSDK.getContractAddress(network, tokenSymbol, contractVersion);
     // Create SDK instance - token validation is now handled in the constructor
     return new PapayaSDK({
       provider,
-      network,
-      tokenSymbol,
-      contractVersion
+      contractAddress,
+      contractVersion: version
     });
   }
 
@@ -135,7 +133,7 @@ export class PapayaSDK {
    * @param version - Contract version
    * @returns Contract address
    */
-  private getContractAddress(network: NetworkName, tokenSymbol: TokenSymbol, version: string): string {
+  private static getContractAddress(network: NetworkName, tokenSymbol: TokenSymbol, version: string): string {
     const tokenConfigs = NETWORKS[network][tokenSymbol as keyof typeof NETWORKS[typeof network]] as TokenConfig[];
     if (!tokenConfigs) {
       throw new Error(`Token ${tokenSymbol} not supported on network ${network}`);
@@ -575,15 +573,6 @@ export class PapayaSDK {
     }
     
     return this.contract.pay(receiver, amount);
-  }
-
-  /**
-   * Gets the token symbol currently being used by the SDK instance
-   * 
-   * @returns The token symbol (USDT, USDC, or PYUSD)
-   */
-  getTokenSymbol(): TokenSymbol {
-    return this.tokenSymbol;
   }
 
   /**
