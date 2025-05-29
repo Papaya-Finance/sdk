@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Initialize SDK
-        sdk = PapayaSDK.create(provider, networkName, 'USDT');
+        sdk = PapayaSDK.create(provider, networkName, 'USDT', '1.5.1');
         
         updateStatus(`Connected to ${networkName} as ${accounts[0]}`);
       } catch (error) {
