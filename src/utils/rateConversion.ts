@@ -34,7 +34,7 @@ const PERIOD_TO_SECONDS = {
  * @param period - The time period
  * @returns The equivalent per-second rate
  */
-export function convertRatePerSecond(amount: string, period: RatePeriod): number {
+export function convertRatePerSecond(amount: string, period: RatePeriod): BigInt {
   const amountNum = parseFloat(amount);
   const periodFactor = PERIOD_TO_SECONDS[period];
 

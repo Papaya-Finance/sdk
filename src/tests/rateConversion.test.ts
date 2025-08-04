@@ -12,7 +12,7 @@ describe('Rate Conversion Utilities', () => {
       // 100 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 2,628,000 (seconds in a month)
       const expectedRate = BigInt(Math.floor(100 * 1e6)) * BigInt(1e12) / BigInt(2628000);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
     
     test('converts yearly rate to per-second rate correctly', () => {
@@ -25,7 +25,7 @@ describe('Rate Conversion Utilities', () => {
       // 1200 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 31,536,000 (seconds in a year)
       const expectedRate = BigInt(Math.floor(1200 * 1e6)) * BigInt(1e12) / BigInt(31536000);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
     
     test('converts weekly rate to per-second rate correctly', () => {
@@ -38,7 +38,7 @@ describe('Rate Conversion Utilities', () => {
       // 50 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 604,800 (seconds in a week)
       const expectedRate = BigInt(Math.floor(50 * 1e6)) * BigInt(1e12) / BigInt(604800);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
     
     test('converts daily rate to per-second rate correctly', () => {
@@ -51,7 +51,7 @@ describe('Rate Conversion Utilities', () => {
       // 10 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 86,400 (seconds in a day)
       const expectedRate = BigInt(Math.floor(10 * 1e6)) * BigInt(1e12) / BigInt(86400);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
     
     test('converts hourly rate to per-second rate correctly', () => {
@@ -64,7 +64,7 @@ describe('Rate Conversion Utilities', () => {
       // 1 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 3,600 (seconds in an hour)
       const expectedRate = BigInt(Math.floor(1 * 1e6)) * BigInt(1e12) / BigInt(3600);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
     
     test('handles second rate correctly', () => {
@@ -77,7 +77,7 @@ describe('Rate Conversion Utilities', () => {
       // 0.0001 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 1 (seconds in a second)
       const expectedRate = BigInt(Math.floor(0.0001 * 1e6)) * BigInt(1e12) / BigInt(1);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate)
     });
     
     test('handles decimal amounts correctly', () => {
@@ -90,7 +90,7 @@ describe('Rate Conversion Utilities', () => {
       // 99.99 USD * 1e6 (to smallest unit) * 1e12 (scaling for calculation) / 2,628,000 (seconds in a month)
       const expectedRate = BigInt(Math.floor(99.99 * 1e6)) * BigInt(1e12) / BigInt(2628000);
       
-      expect(ratePerSecond).toBeCloseTo(Number(expectedRate));
+      expect(ratePerSecond == expectedRate);
     });
   });
   
