@@ -41,7 +41,7 @@ export function convertRatePerSecond(amount: string, period: RatePeriod): number
   const amountInSmallestUnit = BigInt(Math.floor(amountNum * 1e6)) * BigInt(1e12);
   const ratePerSecond = amountInSmallestUnit / BigInt(periodFactor);
 
-  return Number(ratePerSecond);
+  return BigInt(ratePerSecond);
 }
 
 /**

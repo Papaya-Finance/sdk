@@ -25,6 +25,13 @@ export const NETWORKS = {
         tokenAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
         tokenPriceFeed: "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7",
         coinPriceFeed: "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
+      },
+      {
+        version: "0.1.0",
+        contractAddress: "0x0116d41a0075e416f7793bDdEc9ec7aCf0413684",
+        tokenAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+        tokenPriceFeed: "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7",
+        coinPriceFeed: "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
       }
     ],
     USDT: [
@@ -45,6 +52,13 @@ export const NETWORKS = {
       {
         version: "1.5.1",
         contractAddress: "0x444a597c2dcadf71187b4c7034d73b8fa80744e2",
+        tokenAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+        tokenPriceFeed: "0x0A6513e40db6EB1b165753AD52E80663aeA50545",
+        coinPriceFeed: "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
+      },
+      {
+        version: "0.1.0",
+        contractAddress: "0x00532507902B8A78BacE140e3a88Dec52507d905",
         tokenAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         tokenPriceFeed: "0x0A6513e40db6EB1b165753AD52E80663aeA50545",
         coinPriceFeed: "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
