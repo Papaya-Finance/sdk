@@ -7,10 +7,11 @@ This document provides practical examples of how to use the Papaya SDK in variou
 1. [Browser Integration](#browser-integration)
 2. [Node.js Server Integration](#nodejs-server-integration)
 3. [Creator Subscription Platform](#creator-subscription-platform)
-4. [Content Monetization](#content-monetization)
-5. [Streaming Payments](#streaming-payments)
-6. [Gasless Transactions](#gasless-transactions)
-7. [Advanced Subscription Management](#advanced-subscription-management)
+4. [Quick Subscription with Multicall](#quick-subscription-with-multicall)
+5. [Content Monetization](#content-monetization)
+6. [Streaming Payments](#streaming-payments)
+7. [Gasless Transactions](#gasless-transactions)
+8. [Advanced Subscription Management](#advanced-subscription-management)
 
 ## Browser Integration
 
@@ -339,6 +340,235 @@ function CreatorProfile({ creatorAddress, projectId }: CreatorProfileProps) {
 }
 
 export default CreatorProfile;
+```
+
+## Quick Subscription with Multicall
+
+This example demonstrates how to use the `depositAndSubscribe()` method to combine deposit and subscription operations in a single transaction, saving gas and improving user experience.
+
+```typescript
+// QuickSubscribe.tsx
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import { PapayaSDK, RatePeriod } from '@papaya_fi/sdk';
+
+interface QuickSubscribeProps {
+  creatorAddress: string;
+  projectId: number;
+}
+
+function QuickSubscribe({ creatorAddress, projectId }: QuickSubscribeProps) {
+  const [papaya, setPapaya] = useState<PapayaSDK | null>(null);
+  const [depositAmount, setDepositAmount] = useState('100');
+  const [subscriptionRate, setSubscriptionRate] = useState('100');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Initialize SDK
+  React.useEffect(() => {
+    async function initialize() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          
+          const papayaInstance = PapayaSDK.create(signer, 'polygon', 'USDT');
+          setPapaya(papayaInstance);
+        } catch (error) {
+          console.error('Error initializing SDK:', error);
+          setError('Failed to initialize. Please make sure MetaMask is connected.');
+        }
+      } else {
+        setError('Please install MetaMask!');
+      }
+    }
+    
+    initialize();
+  }, []);
+  
+  // Handle quick subscription (deposit + subscribe in one transaction)
+  async function handleQuickSubscribe() {
+    if (!papaya) {
+      setError('SDK not initialized');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Deposit and subscribe in a single transaction
+      const tx = await papaya.depositAndSubscribe(
+        creatorAddress,        // author
+        depositAmount,         // deposit amount ($100)
+        subscriptionRate,      // subscription rate ($100/month)
+        RatePeriod.MONTH,     // period
+        projectId,            // projectId
+        false,                // isPermit2
+        6                     // decimals (USDT/USDC)
+      );
+      
+      logOutput(`Transaction sent: ${tx.hash}`);
+      logOutput('Waiting for confirmation...');
+      
+      const receipt = await tx.wait();
+      
+      if (receipt.status === 1) {
+        logOutput('✅ Success! Deposit and subscription completed in one transaction!');
+        logOutput(`Transaction confirmed in block: ${receipt.blockNumber}`);
+      } else {
+        throw new Error('Transaction failed');
+      }
+    } catch (error: any) {
+      console.error('Error in quick subscribe:', error);
+      setError(error.message || 'Failed to complete quick subscription');
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  // Helper function for logging
+  function logOutput(message: string) {
+    console.log(message);
+    // In a real app, you might want to display this in the UI
+  }
+  
+  if (error && !papaya) {
+    return <div className="error">{error}</div>;
+  }
+  
+  return (
+    <div className="quick-subscribe">
+      <h2>Quick Subscribe</h2>
+      <p className="info">
+        Deposit and subscribe in a single transaction to save gas and improve UX.
+      </p>
+      
+      <div className="form-group">
+        <label>
+          Deposit Amount (USDT):
+          <input
+            type="number"
+            value={depositAmount}
+            onChange={(e) => setDepositAmount(e.target.value)}
+            placeholder="100"
+            min="1"
+          />
+        </label>
+        <small>Amount to deposit into your Papaya account</small>
+      </div>
+      
+      <div className="form-group">
+        <label>
+          Subscription Rate (USDT/month):
+          <input
+            type="number"
+            value={subscriptionRate}
+            onChange={(e) => setSubscriptionRate(e.target.value)}
+            placeholder="100"
+            min="1"
+          />
+        </label>
+        <small>Monthly subscription rate</small>
+      </div>
+      
+      <div className="form-group">
+        <label>
+          Creator Address:
+          <input
+            type="text"
+            value={creatorAddress}
+            readOnly
+            disabled
+          />
+        </label>
+      </div>
+      
+      <div className="form-group">
+        <label>
+          Project ID:
+          <input
+            type="number"
+            value={projectId}
+            readOnly
+            disabled
+          />
+        </label>
+      </div>
+      
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+      
+      <button
+        onClick={handleQuickSubscribe}
+        disabled={loading || !papaya}
+        className="primary-button"
+      >
+        {loading ? 'Processing...' : 'Deposit & Subscribe'}
+      </button>
+      
+      <div className="benefits">
+        <h3>Benefits of using depositAndSubscribe:</h3>
+        <ul>
+          <li>✅ Saves gas by combining two operations into one transaction</li>
+          <li>✅ Atomic execution: both operations succeed or both fail</li>
+          <li>✅ Better UX: only one transaction confirmation needed</li>
+          <li>✅ Faster: no need to wait for deposit confirmation before subscribing</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export default QuickSubscribe;
+```
+
+### Using Multicall Directly
+
+If you need more control or want to combine different operations, you can use the `multicall()` method directly:
+
+```typescript
+// CustomMulticall.ts
+import { ethers } from 'ethers';
+import { PapayaSDK, formatInput, convertRatePerSecond, RatePeriod } from '@papaya_fi/sdk';
+
+async function customMulticallExample(papaya: PapayaSDK) {
+  const creatorAddress = '0x...';
+  const depositAmount = '100';
+  const subscriptionRate = '100';
+  const projectId = 0;
+  
+  // Encode deposit call
+  const depositData = papaya.contract.interface.encodeFunctionData("deposit", [
+    formatInput(depositAmount, 6),  // amount in wei
+    false                            // isPermit2
+  ]);
+  
+  // Encode subscribe call
+  const subscribeData = papaya.contract.interface.encodeFunctionData("subscribe", [
+    creatorAddress,
+    convertRatePerSecond(subscriptionRate, RatePeriod.MONTH),
+    projectId
+  ]);
+  
+  // Execute both operations in one transaction
+  // Order is important: deposit first, then subscribe
+  const tx = await papaya.multicall([depositData, subscribeData]);
+  
+  const receipt = await tx.wait();
+  
+  if (receipt.status === 1) {
+    console.log('Multicall transaction successful!');
+    console.log(`Block: ${receipt.blockNumber}`);
+  } else {
+    throw new Error('Transaction failed');
+  }
+}
 ```
 
 ## Content Monetization

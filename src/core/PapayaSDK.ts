@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Papaya } from '../contracts/abi';
 import { NETWORKS, DEFAULT_VERSIONS, NetworkName, TokenSymbol } from '../contracts/networks';
 import { PapayaSDKOptions, Subscription, UserInfo } from '../types';
-import { RatePeriod, decodeRates, convertRatePerSecond } from '../utils/rateConversion';
+import { RatePeriod, decodeRates, convertRatePerSecond, formatInput } from '../utils/rateConversion';
 
 // Define a TokenConfig type to match the structure in networks.ts
 type TokenConfig = {
@@ -601,5 +601,75 @@ export class PapayaSDK {
    */
   static getAvailableNetworks(): NetworkName[] {
     return Object.keys(NETWORKS) as NetworkName[];
+  }
+
+  /**
+   * Executes multiple contract calls in a single transaction
+   * 
+   * @param data - Array of encoded function call data (bytes)
+   * @returns Transaction response
+   */
+  async multicall(data: string[]): Promise<ethers.TransactionResponse> {
+    if (!this.signer) {
+      throw new Error("Signer is required for multicall");
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error("Multicall data array cannot be empty");
+    }
+
+    return this.contract.multicall(data);
+  }
+
+  /**
+   * Deposits tokens and subscribes to an author in a single transaction using multicall
+   * This method combines deposit and subscribe operations atomically, saving gas and improving UX
+   * 
+   * @param author - Author address to subscribe to
+   * @param amount - Amount to deposit (in token units, e.g., "100" for $100)
+   * @param rate - Subscription rate per period (in token units, e.g., "100" for $100/month)
+   * @param period - Time period for the subscription rate (default: MONTH)
+   * @param projectId - Project ID for the subscription
+   * @param isPermit2 - Whether to use Permit2 for deposit (default: false)
+   * @param decimals - Token decimals (default: 6 for USDT/USDC)
+   * @returns Transaction response
+   */
+  async depositAndSubscribe(
+    author: string,
+    amount: string | number | bigint,
+    rate: string | number | bigint,
+    period: RatePeriod = RatePeriod.MONTH,
+    projectId: number,
+    isPermit2: boolean = false,
+    decimals: number = 6
+  ): Promise<ethers.TransactionResponse> {
+    if (!this.signer) {
+      throw new Error("Signer is required for depositAndSubscribe");
+    }
+
+    // Convert amount to bigint (wei format)
+    const amountInWei = typeof amount === 'string' || typeof amount === 'number'
+      ? formatInput(amount.toString(), decimals)
+      : BigInt(amount);
+
+    // Convert rate to per-second rate
+    const ratePerSecond = convertRatePerSecond(rate.toString(), period);
+
+    // Encode deposit call
+    const depositData = this.contract.interface.encodeFunctionData("deposit", [
+      amountInWei,
+      isPermit2
+    ]);
+
+    // Encode subscribe call
+    const subscribeData = this.contract.interface.encodeFunctionData("subscribe", [
+      author,
+      ratePerSecond,
+      projectId
+    ]);
+
+    // Execute multicall with both operations
+    // Order is important: deposit first, then subscribe
+    return this.multicall([depositData, subscribeData]);
   }
 } 

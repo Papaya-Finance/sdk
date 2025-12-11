@@ -10,6 +10,7 @@ This document provides a comprehensive reference for all methods available in th
 - [Withdrawal Methods](#withdrawal-methods)
 - [Subscription Methods](#subscription-methods)
 - [Payment Methods](#payment-methods)
+- [Multicall Methods](#multicall-methods)
 - [Utility Methods](#utility-methods)
 
 ## Important Note on Rate Values
@@ -235,6 +236,59 @@ const recipientAddress = '0x...';
 const tx = await papaya.depositFor(amount, recipientAddress);
 await tx.wait();
 ```
+
+### `depositAndSubscribe()`
+
+Deposits tokens and creates a subscription in a single transaction using multicall. This method combines `deposit()` and `subscribe()` operations atomically, saving gas and improving user experience.
+
+```typescript
+async depositAndSubscribe(
+  author: string,
+  amount: string | number | bigint,
+  rate: string | number | bigint,
+  period: RatePeriod = RatePeriod.MONTH,
+  projectId: number,
+  isPermit2: boolean = false,
+  decimals: number = 6
+): Promise<ethers.TransactionResponse>
+```
+
+**Parameters:**
+- `author`: The address of the creator to subscribe to
+- `amount`: The amount of tokens to deposit (in token units, e.g., "100" for $100)
+- `rate`: The subscription rate per period (in token units, e.g., "100" for $100/month)
+- `period`: (Optional) The subscription period (default: `RatePeriod.MONTH`)
+- `projectId`: The project ID associated with the subscription
+- `isPermit2`: (Optional) Whether to use Permit2 for deposit (default: false)
+- `decimals`: (Optional) Token decimals (default: 6 for USDT/USDC)
+
+**Returns:** An ethers.js `TransactionResponse` object.
+
+**Benefits:**
+- ✅ Saves gas by combining two operations into one transaction
+- ✅ Atomic execution: both operations succeed or both fail
+- ✅ Better UX: only one transaction confirmation needed
+
+**Example:**
+```typescript
+const creatorAddress = '0x...';
+
+// Deposit $100 and subscribe to $100/month in a single transaction
+const tx = await papaya.depositAndSubscribe(
+  creatorAddress,  // author
+  '100',           // deposit amount ($100)
+  '100',           // subscription rate ($100/month)
+  RatePeriod.MONTH,
+  0,               // projectId
+  false,           // isPermit2
+  6                // decimals (USDT/USDC)
+);
+
+await tx.wait();
+console.log('Deposit and subscription completed in one transaction!');
+```
+
+**Note:** The order of operations is important - deposit is executed first, then subscribe. This ensures the account has sufficient balance before creating the subscription.
 
 ## Withdrawal Methods
 
@@ -522,6 +576,52 @@ const amount = formatInput('20', 6);
 const tx = await papaya.pay(recipientAddress, amount);
 await tx.wait();
 ```
+
+## Multicall Methods
+
+Multicall allows you to execute multiple contract calls in a single transaction, which can save gas and improve user experience by reducing the number of transactions needed.
+
+### `multicall()`
+
+Executes multiple contract calls in a single transaction.
+
+```typescript
+async multicall(data: string[]): Promise<ethers.TransactionResponse>
+```
+
+**Parameters:**
+- `data`: Array of encoded function call data (bytes). Each element should be the result of `contract.interface.encodeFunctionData()`.
+
+**Returns:** An ethers.js `TransactionResponse` object.
+
+**Example:**
+```typescript
+// Encode deposit call
+const depositData = papaya.contract.interface.encodeFunctionData("deposit", [
+  formatInput('100', 6),  // amount
+  false                    // isPermit2
+]);
+
+// Encode subscribe call
+const subscribeData = papaya.contract.interface.encodeFunctionData("subscribe", [
+  '0x...',              // author address
+  convertRatePerSecond('100', RatePeriod.MONTH),  // rate per second
+  0                      // projectId
+]);
+
+// Execute both operations in one transaction
+// Order is important: deposit first, then subscribe
+const tx = await papaya.multicall([depositData, subscribeData]);
+await tx.wait();
+console.log('Multicall transaction completed!');
+```
+
+**Use Cases:**
+- Combining deposit and subscribe operations
+- Batch operations for better UX
+- Atomic execution of multiple related operations
+
+**Note:** The order of operations in the array matters. Make sure dependent operations come after their prerequisites (e.g., deposit before subscribe).
 
 ## Utility Methods
 

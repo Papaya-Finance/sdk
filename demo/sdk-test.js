@@ -466,6 +466,66 @@ function init() {
             handleError(error);
         }
     });
+
+    // DEPOSIT & SUBSCRIBE METHOD
+    document.getElementById('depositSubscribeButton').addEventListener('click', async () => {
+        try {
+            const author = document.getElementById('depositSubscribeAuthor').value;
+            const amount = document.getElementById('depositSubscribeAmount').value;
+            const rate = document.getElementById('depositSubscribeRate').value;
+            const period = document.getElementById('depositSubscribePeriod').value;
+            const projectId = document.getElementById('depositSubscribeProjectId').value;
+            const usePermit2 = document.getElementById('depositSubscribePermit2').checked;
+            const decimals = document.getElementById('depositSubscribeDecimals').value || 6;
+            
+            if (!author) {
+                throw new Error('Author address is required');
+            }
+            
+            if (!amount) {
+                throw new Error('Deposit amount is required');
+            }
+            
+            if (!rate) {
+                throw new Error('Subscription rate is required');
+            }
+            
+            if (!projectId && projectId !== '0') {
+                throw new Error('Project ID is required');
+            }
+            
+            logOutput(`Depositing ${amount} and subscribing to ${author} with rate ${rate} per ${period} for project ${projectId}...`);
+            logOutput(`Using multicall to combine operations in a single transaction...`);
+            
+            // Convert period string to RatePeriod enum value
+            // RatePeriod enum values: 'second', 'hour', 'day', 'week', 'month', 'year'
+            const ratePeriod = period; // depositAndSubscribe accepts string period values
+            
+            const tx = await papayaSDK.depositAndSubscribe(
+                author,
+                amount,
+                rate,
+                ratePeriod,
+                parseInt(projectId),
+                usePermit2,
+                parseInt(decimals)
+            );
+            
+            logOutput(`Deposit & Subscribe transaction sent: ${tx.hash}`);
+            logOutput(`Waiting for confirmation...`);
+            
+            const receipt = await tx.wait();
+            
+            if (receipt.status === 1) {
+                logOutput(`✅ Success! Deposit and subscription completed in one transaction!`);
+                logOutput(`Transaction confirmed in block: ${receipt.blockNumber}`);
+            } else {
+                throw new Error('Transaction failed');
+            }
+        } catch (error) {
+            handleError(error);
+        }
+    });
 }
 
 // Initialize the app when DOM is loaded

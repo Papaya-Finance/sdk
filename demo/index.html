@@ -133,6 +133,9 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="payment-tab" data-bs-toggle="pill" data-bs-target="#payment" type="button" role="tab">Payment</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="deposit-subscribe-tab" data-bs-toggle="pill" data-bs-target="#deposit-subscribe" type="button" role="tab">Deposit & Subscribe</button>
+                    </li>
                 </ul>
                 <div class="tab-content" id="methodTabContent">
                     <!-- Balance Tab -->
@@ -275,6 +278,56 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary" id="payButton">Pay</button>
+                        </div>
+                    </div>
+
+                    <!-- Deposit & Subscribe Tab -->
+                    <div class="tab-pane fade" id="deposit-subscribe" role="tabpanel">
+                        <div class="alert alert-info" role="alert">
+                            <strong>Deposit & Subscribe:</strong> This method combines deposit and subscribe operations in a single transaction using multicall, saving gas and improving UX.
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribeAuthor">Author Address</label>
+                            <input type="text" class="form-control" id="depositSubscribeAuthor" placeholder="Enter author address to subscribe to">
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribeAmount">Deposit Amount</label>
+                            <input type="number" class="form-control" id="depositSubscribeAmount" placeholder="Enter amount to deposit (e.g., 100 for $100)">
+                            <small class="form-text text-muted">Amount in token units (e.g., "100" for $100)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribeRate">Subscription Rate</label>
+                            <input type="number" class="form-control" id="depositSubscribeRate" placeholder="Enter subscription rate (e.g., 100 for $100/month)">
+                            <small class="form-text text-muted">Rate per period in token units (e.g., "100" for $100/month)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribePeriod">Time Period</label>
+                            <select class="form-select" id="depositSubscribePeriod">
+                                <option value="second">Per Second</option>
+                                <option value="hour">Per Hour</option>
+                                <option value="day">Per Day</option>
+                                <option value="week">Per Week</option>
+                                <option value="month" selected>Per Month</option>
+                                <option value="year">Per Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribeProjectId">Project ID</label>
+                            <input type="number" class="form-control" id="depositSubscribeProjectId" placeholder="Enter project ID" value="0">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="depositSubscribePermit2">
+                            <label class="form-check-label" for="depositSubscribePermit2">
+                                Use Permit2 for deposit
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositSubscribeDecimals">Token Decimals</label>
+                            <input type="number" class="form-control" id="depositSubscribeDecimals" placeholder="Enter token decimals" value="6">
+                            <small class="form-text text-muted">Default: 6 for USDT/USDC</small>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" id="depositSubscribeButton">Deposit & Subscribe</button>
                         </div>
                     </div>
                 </div>
