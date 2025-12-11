@@ -2,6 +2,11 @@ name: Publish to npm
 
 on:
   workflow_dispatch:
+    inputs:
+      otp:
+        description: 'NPM OTP code (required if 2FA is enabled)'
+        required: false
+        type: string
 
 jobs:
   publish:
@@ -51,6 +56,14 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish --access public --tag latest
+        run: |
+          # If OTP is provided, use it. Otherwise, assume automation token is used (no 2FA required)
+          # Note: For accounts with 2FA enabled, it's recommended to use an automation token
+          # Create one at: https://www.npmjs.com/settings/[your-username]/tokens (select "Automation" type)
+          if [ -n "${{ inputs.otp }}" ]; then
+            npm publish --access public --tag latest --otp=${{ inputs.otp }}
+          else
+            npm publish --access public --tag latest
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 
