@@ -239,6 +239,15 @@ export const NETWORKS = {
         tokenPriceFeed: "0x4f99C4AB8070CB83d369070Df10379EFA1B2915a",
         coinPriceFeed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
       }
+    ],
+    DAI: [
+      {
+        version: "1.6.0",
+        contractAddress: "0x566CBD7eB900C5eC1E7B6D872DAE845Ce6060DDE",
+        tokenAddress: "0x6b175474e89094c44da98b954eedeac495271d0f",
+        tokenPriceFeed: "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9",
+        coinPriceFeed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+      }
     ]
   },
   sei: {
@@ -292,7 +301,7 @@ export const DEFAULT_VERSIONS = {
 /**
  * Supported token symbols
  */
-export type TokenSymbol = 'USDT' | 'USDC' | 'PYUSD';
+export type TokenSymbol = 'USDT' | 'USDC' | 'PYUSD' | 'DAI';
 
 /**
  * Supported network names
